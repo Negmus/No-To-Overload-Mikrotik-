@@ -1,0 +1,19 @@
+:local tmp ""
+:local tmp2 ""
+:local tmp3 ""
+:local wersja [system routerboard get upgrade-firmware]
+foreach v in=[/interface ethernet find where !(poe-out="off") and !(comment~"nie sprawdzaj")] do={
+	set tmp [/interface ethernet poe get $v name]
+	set tmp2 ([/interface ethernet poe monitor $tmp  once as-value ]->"poe-out-current")
+	set tmp3 ([/interface ethernet poe monitor $tmp  once as-value ]->"poe-out-voltage")
+	set tmp [:pick $tmp 0 [:find $tmp " "]]
+	:if ($tmp3<300) do={
+		:if ($tmp2>750) do={
+			log warning "Moc na $tmp jest za wysoka $tmp2 mA, port podaje 24V"
+		}
+	} else={
+		:if ($tmp2>350)	do={
+		log warning "Moc na $tmp jest za wysoka $tmp2 mA, Port podaje 48V"
+		}
+	}
+}
